@@ -71,11 +71,20 @@ func restoreZK() bool {
 		defer func() {
 			_ = os.RemoveAll(s)
 		}()
+
+		if brf.Endpoint == "" {
+			return false
+		}
+
 		zks := []string{brf.Endpoint}
 		zkconn, _, err := zk.Connect(zks, time.Duration(brf.Timeout) * time.Second)
 
 		if err != nil {
 			log.Fatal(err)
+		}
+
+		if zkconn == nil {
+			log.Fatal("zkconn is", zkconn)
 		}
 
 		zkconn.SetLogger(log.StandardLogger())
