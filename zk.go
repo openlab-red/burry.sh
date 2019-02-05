@@ -72,12 +72,17 @@ func restoreZK() bool {
 			_ = os.RemoveAll(s)
 		}()
 		zks := []string{brf.Endpoint}
-		zkconn, _, _ = zk.Connect(zks, time.Duration(brf.Timeout) * time.Second)
+		zkconn, _, err := zk.Connect(zks, time.Duration(brf.Timeout) * time.Second)
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
 		zkconn.SetLogger(log.StandardLogger())
 		// walk the snapshot directory and use the ZK API to
 		// restore znodes from the local filesystem - note that
 		// only non-existing znodes will be created:
-		if err := filepath.Walk(s, visitZKReverse); err != nil {
+		if err = filepath.Walk(s, visitZKReverse); err != nil {
 			log.WithFields(log.Fields{"func": "restoreZK"}).Error(fmt.Sprintf("%s", err))
 			return false
 		}
