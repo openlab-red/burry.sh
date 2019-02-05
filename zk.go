@@ -73,7 +73,7 @@ func restoreZK() bool {
 		}()
 		zks := []string{brf.Endpoint}
 		zkconn, _, _ = zk.Connect(zks, time.Duration(brf.Timeout) * time.Second)
-//		zkconn.SetLogger(log.StandardLogger())
+		zkconn.SetLogger(log.StandardLogger())
 		// walk the snapshot directory and use the ZK API to
 		// restore znodes from the local filesystem - note that
 		// only non-existing znodes will be created:
