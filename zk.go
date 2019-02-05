@@ -17,7 +17,7 @@ func backupZK() bool {
 		return false
 	}
 	zks := []string{brf.Endpoint}
-	zkconn, _, _ = zk.Connect(zks, time.Duration(brf.Timeout) * time.Second)
+	zkconn, _, _ = zk.Connect(zks, time.Duration(brf.Timeout)*time.Second)
 	// use the ZK API to visit each node and store
 	// the values in the local filesystem:
 	visitZK("/", reapsimple)
@@ -76,8 +76,10 @@ func restoreZK() bool {
 			return false
 		}
 
+		var err error
+
 		zks := []string{brf.Endpoint}
-		zkconn, _, err := zk.Connect(zks, time.Duration(brf.Timeout) * time.Second)
+		zkconn, _, err = zk.Connect(zks, time.Duration(brf.Timeout)*time.Second)
 
 		if err != nil {
 			log.Fatal(err)
