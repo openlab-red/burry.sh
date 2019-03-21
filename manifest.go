@@ -54,6 +54,7 @@ type S3Config struct {
 	SecretAccessKey string
 	Bucket          string
 	Prefix          string
+	SSL             bool
 }
 
 // parsecred parses the cred string in the form:
@@ -69,9 +70,10 @@ func parsecred() Credentials {
 	params := []CredParams{}
 	// 2nd to end are cred params in key-value format:
 	for _, p := range raw[1:] {
+		pair := strings.SplitN(p, "=", 2)
 		p := CredParams{
-			Key:   strings.Split(p, "=")[0],
-			Value: strings.Split(p, "=")[1],
+			Key:   pair[0],
+			Value: pair[1],
 		}
 		params = append(params, p)
 	}
@@ -83,6 +85,7 @@ func parsecred() Credentials {
 // extractS3config tries to extract AWS access key and secret
 // from an already parsed cred string
 func extractS3config() (s3Config S3Config) {
+	s3Config.SSL = true
 	for _, p := range brf.Creds.Params {
 		if p.Key == "ACCESS_KEY_ID" {
 			s3Config.AccessKeyId = p.Value
@@ -95,6 +98,13 @@ func extractS3config() (s3Config S3Config) {
 		}
 		if p.Key == "PREFIX" {
 			s3Config.Prefix = p.Value
+		}
+		if p.Key == "SSL" {
+			var err error
+			s3Config.SSL, err = strconv.ParseBool(p.Value)
+			if err != nil {
+				log.Fatal("s3 config parse: ssl:", err)
+			}
 		}
 	}
 	return s3Config
