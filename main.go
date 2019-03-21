@@ -64,7 +64,7 @@ var (
 	snapshotid string
 	// number of restored items (znodes or keys):
 	numrestored int
-	// Overwrite existing data
+	// Forget existing data
 	forget bool
 )
 
