@@ -128,7 +128,7 @@ func visitZKReverse(path string, f os.FileInfo, err error) error {
 							if !forget {
 								return cerr
 							} else {
-								log.WithFields(log.Fields{"func": "visitZKReverse"}).Info(fmt.Sprintf("Ignoring %s", znode))
+								log.WithFields(log.Fields{"func": "visitZKReverse"}).Info(fmt.Sprintf("Attempting to insert %s as leaf znode, ignoring error %s", znode, cerr))
 							}
 						} else {
 							if _, zerr := zkconn.Create(znode, c, 0, zk.WorldACL(zk.PermAll)); zerr != nil {
@@ -136,7 +136,8 @@ func visitZKReverse(path string, f os.FileInfo, err error) error {
 								if !forget {
 									return zerr
 								} else {
-									log.WithFields(log.Fields{"func": "visitZKReverse"}).Info(fmt.Sprintf("Ignoring %s", znode))
+									log.WithFields(log.Fields{"func": "visitZKReverse"}).Info(fmt.Sprintf("Attempting to insert %s as leaf znode, ignoring error %s", znode, zerr))
+									log.WithFields(log.Fields{"func": "visitZKReverse"}).Info(fmt.Sprintf("Value: %s", c))
 								}
 							} else {
 								log.WithFields(log.Fields{"func": "visitZKReverse"}).Info(fmt.Sprintf("Restored %s", znode))
@@ -151,7 +152,7 @@ func visitZKReverse(path string, f os.FileInfo, err error) error {
 							if !forget {
 								return zerr
 							} else {
-								log.WithFields(log.Fields{"func": "visitZKReverse"}).Info(fmt.Sprintf("Ignoring %s", znode))
+								log.WithFields(log.Fields{"func": "visitZKReverse"}).Info(fmt.Sprintf("Attempting to insert %s as a non-leaf, ignoring error %s", znode, zerr))
 							}
 						} else {
 							log.WithFields(log.Fields{"func": "visitZKReverse"}).Info(fmt.Sprintf("Restored %s", znode))
