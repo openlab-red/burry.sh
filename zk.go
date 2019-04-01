@@ -131,7 +131,9 @@ func visitZKReverse(path string, f os.FileInfo, err error) error {
 						} else {
 							if _, zerr := zkconn.Create(znode, c, 0, zk.WorldACL(zk.PermAll)); zerr != nil {
 								log.WithFields(log.Fields{"func": "visitZKReverse"}).Error(fmt.Sprintf("%s", zerr))
-								return zerr
+								if !forget {
+									return zerr
+								}
 							} else {
 								log.WithFields(log.Fields{"func": "visitZKReverse"}).Info(fmt.Sprintf("Restored %s", znode))
 								log.WithFields(log.Fields{"func": "visitZKReverse"}).Debug(fmt.Sprintf("Value: %s", c))
@@ -142,7 +144,9 @@ func visitZKReverse(path string, f os.FileInfo, err error) error {
 						log.WithFields(log.Fields{"func": "visitZKReverse"}).Debug(fmt.Sprintf("Attempting to insert %s as a non-leaf znode", znode))
 						if _, zerr := zkconn.Create(znode, []byte{}, 0, zk.WorldACL(zk.PermAll)); zerr != nil {
 							log.WithFields(log.Fields{"func": "visitZKReverse"}).Error(fmt.Sprintf("%s", zerr))
-							return zerr
+							if !forget {
+								return zerr
+							}
 						} else {
 							log.WithFields(log.Fields{"func": "visitZKReverse"}).Info(fmt.Sprintf("Restored %s", znode))
 							numrestored = numrestored + 1
