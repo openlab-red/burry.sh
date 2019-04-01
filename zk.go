@@ -137,7 +137,9 @@ func visitZKReverse(path string, f os.FileInfo, err error) error {
 									return zerr
 								} else {
 									log.WithFields(log.Fields{"func": "visitZKReverse"}).Info(fmt.Sprintf("Attempting to insert %s as leaf znode, ignoring error %s", znode, zerr))
-									log.WithFields(log.Fields{"func": "visitZKReverse"}).Info(fmt.Sprintf("Value: %s", c))
+									current_data, _, _ := zkconn.Get(znode)
+									log.WithFields(log.Fields{"func": "visitZKReverse"}).Info(fmt.Sprintf("Current existing data: %s", current_data))
+									log.WithFields(log.Fields{"func": "visitZKReverse"}).Info(fmt.Sprintf("Data to restore: %s", c))
 								}
 							} else {
 								log.WithFields(log.Fields{"func": "visitZKReverse"}).Info(fmt.Sprintf("Restored %s", znode))
