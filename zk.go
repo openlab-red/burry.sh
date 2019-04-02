@@ -17,7 +17,7 @@ func backupZK() bool {
 		return false
 	}
 	zks := []string{brf.Endpoint}
-	zkconn, _, _ = zk.Connect(zks, time.Duration(brf.Timeout)*time.Second)
+	zkconn, _, _ = zk.Connect(zks, time.Duration(brf.Timeout) * time.Second)
 	// use the ZK API to visit each node and store
 	// the values in the local filesystem:
 	visitZK("/", reapsimple)
@@ -71,29 +71,13 @@ func restoreZK() bool {
 		defer func() {
 			_ = os.RemoveAll(s)
 		}()
-
-		if brf.Endpoint == "" {
-			return false
-		}
-
-		var err error
-
 		zks := []string{brf.Endpoint}
-		zkconn, _, err = zk.Connect(zks, time.Duration(brf.Timeout)*time.Second)
-
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		if zkconn == nil {
-			log.Fatal("zkconn is", zkconn)
-		}
-
+		zkconn, _, _ = zk.Connect(zks, time.Duration(brf.Timeout) * time.Second)
 		zkconn.SetLogger(log.StandardLogger())
 		// walk the snapshot directory and use the ZK API to
 		// restore znodes from the local filesystem - note that
 		// only non-existing znodes will be created:
-		if err = filepath.Walk(s, visitZKReverse); err != nil {
+		if err := filepath.Walk(s, visitZKReverse); err != nil {
 			log.WithFields(log.Fields{"func": "restoreZK"}).Error(fmt.Sprintf("%s", err))
 			return false
 		}
@@ -124,22 +108,15 @@ func visitZKReverse(path string, f os.FileInfo, err error) error {
 					if _, eerr := os.Stat(cfile); eerr == nil { // there is a content file at this path
 						log.WithFields(log.Fields{"func": "visitZKReverse"}).Debug(fmt.Sprintf("Attempting to insert %s as leaf znode", znode))
 						if c, cerr := readc(cfile); cerr != nil {
-							//log.WithFields(log.Fields{"func": "visitZKReverse"}).Error(fmt.Sprintf("%s", cerr))
-							if !forget {
-								return cerr
-							} else {
-								log.WithFields(log.Fields{"func": "visitZKReverse"}).Info(fmt.Sprintf("Attempting to insert %s as leaf znode, ignoring error %s", znode, cerr))
-							}
+							log.WithFields(log.Fields{"func": "visitZKReverse"}).Error(fmt.Sprintf("%s", cerr))
+							return cerr
 						} else {
 							if _, zerr := zkconn.Create(znode, c, 0, zk.WorldACL(zk.PermAll)); zerr != nil {
-								//log.WithFields(log.Fields{"func": "visitZKReverse"}).Error(fmt.Sprintf("%s", zerr))
 								if !forget {
+									log.WithFields(log.Fields{"func": "visitZKReverse"}).Error(fmt.Sprintf("%s", zerr))
 									return zerr
 								} else {
-									log.WithFields(log.Fields{"func": "visitZKReverse"}).Info(fmt.Sprintf("Attempting to insert %s as leaf znode, ignoring error %s", znode, zerr))
-									current_data, _, _ := zkconn.Get(znode)
-									log.WithFields(log.Fields{"func": "visitZKReverse"}).Info(fmt.Sprintf("Current existing data: %s", current_data))
-									log.WithFields(log.Fields{"func": "visitZKReverse"}).Info(fmt.Sprintf("Data to restore: %s", c))
+									log.WithFields(log.Fields{"func": "visitZKReverse"}).Info(fmt.Sprintf("Ignoring existing %s", znode))
 								}
 							} else {
 								log.WithFields(log.Fields{"func": "visitZKReverse"}).Info(fmt.Sprintf("Restored %s", znode))
@@ -150,11 +127,11 @@ func visitZKReverse(path string, f os.FileInfo, err error) error {
 					} else {
 						log.WithFields(log.Fields{"func": "visitZKReverse"}).Debug(fmt.Sprintf("Attempting to insert %s as a non-leaf znode", znode))
 						if _, zerr := zkconn.Create(znode, []byte{}, 0, zk.WorldACL(zk.PermAll)); zerr != nil {
-							//log.WithFields(log.Fields{"func": "visitZKReverse"}).Error(fmt.Sprintf("%s", zerr))
 							if !forget {
+								log.WithFields(log.Fields{"func": "visitZKReverse"}).Error(fmt.Sprintf("%s", zerr))
 								return zerr
 							} else {
-								log.WithFields(log.Fields{"func": "visitZKReverse"}).Info(fmt.Sprintf("Attempting to insert %s as a non-leaf, ignoring error %s", znode, zerr))
+								log.WithFields(log.Fields{"func": "visitZKReverse"}).Info(fmt.Sprintf("Ignoring existing %s", znode))
 							}
 						} else {
 							log.WithFields(log.Fields{"func": "visitZKReverse"}).Info(fmt.Sprintf("Restored %s", znode))
