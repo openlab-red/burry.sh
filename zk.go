@@ -17,7 +17,7 @@ func backupZK() bool {
 		return false
 	}
 	zks := []string{brf.Endpoint}
-	zkconn, _, _ = zk.Connect(zks, time.Duration(brf.Timeout) * time.Second)
+	zkconn, _, _ = zk.Connect(zks, time.Duration(brf.Timeout)*time.Second)
 	// use the ZK API to visit each node and store
 	// the values in the local filesystem:
 	visitZK("/", reapsimple)
@@ -63,6 +63,7 @@ func visitZK(path string, fn reap) {
 }
 
 func restoreZK() bool {
+
 	if lookupst(brf.StorageTarget) > 0 { // non-TTY, actual storage
 		// transfer from remote, if applicable:
 		a := fromremote()
@@ -72,7 +73,7 @@ func restoreZK() bool {
 			_ = os.RemoveAll(s)
 		}()
 		zks := []string{brf.Endpoint}
-		zkconn, _, _ = zk.Connect(zks, time.Duration(brf.Timeout) * time.Second)
+		zkconn, _, _ = zk.Connect(zks, time.Duration(brf.Timeout)*time.Second)
 		zkconn.SetLogger(log.StandardLogger())
 		// walk the snapshot directory and use the ZK API to
 		// restore znodes from the local filesystem - note that
@@ -102,6 +103,8 @@ func visitZKReverse(path string, f os.FileInfo, err error) error {
 		} else {
 			if pathpresent {
 				log.WithFields(log.Fields{"func": "visitZKReverse"}).Debug(fmt.Sprintf("znode %s exists already, skipping it", znode))
+			} else if strings.Contains(reject, znode) {
+				log.WithFields(log.Fields{"func": "visitZKReverse"}).Info(fmt.Sprintf("znode %s is rejected, skipping it", znode))
 			} else {
 				if f.IsDir() {
 					cfile, _ := filepath.Abs(filepath.Join(path, CONTENT_FILE))

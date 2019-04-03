@@ -66,6 +66,8 @@ var (
 	numrestored int
 	// Forget existing data
 	forget bool
+	// Reject path
+	reject string
 )
 
 // reap function types take a node path
@@ -85,6 +87,7 @@ func init() {
 	flag.StringVarP(&cred, "credentials", "c", "", fmt.Sprintf("The credentials to use in format STORAGE_TARGET_ENDPOINT,KEY1=VAL1,...KEYn=VALn.\n\tExample: s3.amazonaws.com,ACCESS_KEY_ID=...,SECRET_ACCESS_KEY=...,BUCKET=...,PREFIX=...,SSL=..."))
 	flag.StringVarP(&snapshotid, "snapshot", "s", "", fmt.Sprintf("The ID of the snapshot.\n\tExample: 1483193387"))
 	flag.BoolVarP(&forget, "forget", "f", true, fmt.Sprintf("Forget existing data "))
+	flag.StringVarP(&reject, "reject", "r", "", fmt.Sprintf("Reject path during restore operation.\n\tExample: /brokers/ids,/consumers"))
 
 	flag.Usage = func() {
 		fmt.Printf("Usage: burry [args]\n\n")
