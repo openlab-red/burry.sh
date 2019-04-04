@@ -22,4 +22,4 @@ clean:
 
 .PHONY: binaries
 binaries:
-	gox github.com/mhausenblas/burry.sh
+	gox github.com/openlab-red/burry.sh
